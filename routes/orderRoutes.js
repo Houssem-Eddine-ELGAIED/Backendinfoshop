@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, param } from 'express-validator';
+import { protect, admin } from '../middleware/authMiddleware.js';
 import {
   addOrderItems,
   deleteOrder,
@@ -7,38 +7,37 @@ import {
   getMyOrders,
   updateOrderToPaid,
   updateOrderToDeliver,
-  getOrderById
+  getOrderById,
 } from '../controllers/orderController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
 import validateRequest from '../middleware/validator.js';
+import { param, check } from 'express-validator';
 
 const router = express.Router();
 
-// Validation for adding order items
 const validator = {
-  addOrderItems: [
-    body('cartItems').notEmpty().withMessage('Cart items are required'),
-    body('shippingAddress').notEmpty().withMessage('Shipping address is required'),
-    body('paymentMethod').notEmpty().withMessage('Payment method is required'),
-    body('itemsPrice').isNumeric().withMessage('Items price must be a number'),
-  ],
   getOrderById: [
-    param('id').notEmpty().isMongoId().withMessage('Invalid order ID format')
-  ]
+    param('id').notEmpty().isMongoId().withMessage('Invalid ID format'),
+  ],
+  addOrderItems: [
+    check('cartItems').notEmpty(),
+    check('shippingAddress').notEmpty(),
+    check('paymentMethod').notEmpty(),
+    check('itemsPrice').isNumeric(),
+  ],
 };
 
-// Routes for orders
-router.route('/')
-  .post( validator.addOrderItems, validateRequest, addOrderItems)  // Use the 'protect' middleware to authenticate the user
-  .get( admin, getOrders);  // Only admins can get all orders
+router
+  .route('/')
+  .post(protect,admin, validator.addOrderItems, validateRequest, addOrderItems)
+  .get(protect, admin, getOrders);
 
-router.get('/my-orders', getMyOrders);  // Get orders for the logged-in user
+router.get('/my-orders', protect, admin,getMyOrders);
+router
+  .route('/:id')
+  .get(protect,admin, validator.getOrderById, validateRequest, getOrderById)
+  .delete(protect, admin, validator.getOrderById, validateRequest, deleteOrder);
 
-router.route('/:id')
-  .get( validator.getOrderById, validateRequest, getOrderById)  // Fetch order by ID
-  .delete( admin, deleteOrder);  // Delete order (admin only)
-
-router.put('/:id/pay',  updateOrderToPaid);  // Update order to paid
-router.put('/:id/deliver', admin, updateOrderToDeliver);  // Mark order as delivered (admin only)
+router.put('/:id/pay', protect,admin, updateOrderToPaid);
+router.put('/:id/deliver', protect, admin, updateOrderToDeliver);
 
 export default router;
