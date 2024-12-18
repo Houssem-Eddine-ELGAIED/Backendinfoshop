@@ -29,8 +29,8 @@ const validator = {
 
 // Routes for orders
 router.route('/')
-  .post(protect, validator.addOrderItems, validateRequest, addOrderItems)  // Use the 'protect' middleware to authenticate the user
-  .get(protect, admin, getOrders);  // Only admins can get all orders
+  .post( validator.addOrderItems, validateRequest, addOrderItems)  // Use the 'protect' middleware to authenticate the user
+  .get( admin, getOrders);  // Only admins can get all orders
 
 router.get('/my-orders', protect, getMyOrders);  // Get orders for the logged-in user
 
