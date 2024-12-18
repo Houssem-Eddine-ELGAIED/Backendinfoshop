@@ -32,13 +32,13 @@ router.route('/')
   .post( validator.addOrderItems, validateRequest, addOrderItems)  // Use the 'protect' middleware to authenticate the user
   .get( admin, getOrders);  // Only admins can get all orders
 
-router.get('/my-orders', protect, getMyOrders);  // Get orders for the logged-in user
+router.get('/my-orders', getMyOrders);  // Get orders for the logged-in user
 
 router.route('/:id')
-  .get(protect, validator.getOrderById, validateRequest, getOrderById)  // Fetch order by ID
-  .delete(protect, admin, deleteOrder);  // Delete order (admin only)
+  .get( validator.getOrderById, validateRequest, getOrderById)  // Fetch order by ID
+  .delete( admin, deleteOrder);  // Delete order (admin only)
 
-router.put('/:id/pay', protect, updateOrderToPaid);  // Update order to paid
-router.put('/:id/deliver', protect, admin, updateOrderToDeliver);  // Mark order as delivered (admin only)
+router.put('/:id/pay',  updateOrderToPaid);  // Update order to paid
+router.put('/:id/deliver', admin, updateOrderToDeliver);  // Mark order as delivered (admin only)
 
 export default router;
