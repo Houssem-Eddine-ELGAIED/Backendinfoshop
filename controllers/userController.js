@@ -31,13 +31,9 @@ const loginUser = async (req, res, next) => {
 
    const token= generateToken(req, res, user._id);
       // Setting the JWT as an HTTP-only cookie for enhanced security
-  res.cookie('jwt', token, {
-   
-    secure: false,
-    sameSite: 'None',
-    maxAge: req.body.remember ? 365 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000
-  });
-    res.status(200).json({
+ console.log('token', token)
+   return  res.status(200).json({
+      token,
       message: 'Login successful.',
       userId: user._id,
       name: user.name,
