@@ -4,13 +4,14 @@ import jwt from 'jsonwebtoken';
 // Middleware to protect routes by verifying the JWT token.
 const protect = async (req, res, next) => {
   try {
-    // Extract token from either Authorization header (Bearer <token>) or cookies (jwt)
-    let token = req.headers.authorization?.split(' ')[1] || req.cookies.jwt;
+    // Extract token from the Authorization header (Bearer <token>)
+    const authHeader = req.headers.authorization;
 
-    // If no token is provided, respond with a 401 Unauthorized error.
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication failed: Token not provided.' });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Authentication failed: Token not provided or invalid.' });
     }
+
+    const token = authHeader.split(' ')[1]; // Extract token from "Bearer <token>"
 
     // Verify the JWT token
     let decodedToken;
@@ -22,10 +23,10 @@ const protect = async (req, res, next) => {
 
     // Attach user to the request object using the userId from the token.
     req.user = await User.findById(decodedToken.userId).select('-password');
-    
-    // If no user is found, clear the cookie and return an error.
+
+    // If no user is found, respond with an error.
     if (!req.user) {
-      return res.status(401).clearCookie('jwt').json({ message: 'Authentication failed: User not found.' });
+      return res.status(401).json({ message: 'Authentication failed: User not found.' });
     }
 
     // Proceed to the next middleware or route handler.
@@ -52,9 +53,6 @@ const admin = (req, res, next) => {
       message: error.message || 'Internal Server Error while checking admin privileges.'
     });
   }
-
- 
-
 };
 
 export { protect, admin };
