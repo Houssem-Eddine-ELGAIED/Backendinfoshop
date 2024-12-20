@@ -28,10 +28,10 @@ const validator = {
 
 router
   .route('/')
-  .post(protect,admin, validator.addOrderItems, validateRequest, addOrderItems)
-  .get(protect, admin, getOrders);
+  .post(admin, validator.addOrderItems, validateRequest, addOrderItems)
+  .get( admin, getOrders);
 
-router.get('/my-orders', protect, admin,getMyOrders);
+router.get('/my-orders',  admin,getMyOrders);
 router
   .route('/:id')
   .get(protect,admin, validator.getOrderById, validateRequest, getOrderById)
